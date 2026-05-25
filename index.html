@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火红の小世界 ✨</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0d0d14;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --accent1: #c084fc;
+    --accent2: #60a5fa;
+    --accent3: #f472b6;
+    --text: rgba(255,255,255,0.85);
+    --muted: rgba(255,255,255,0.35);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif SC', 'PingFang SC', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(192,132,252,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(96,165,250,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(244,114,182,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 64px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .header-badge {
+    display: inline-block;
+    border: 1px solid rgba(192,132,252,0.3);
+    border-radius: 30px;
+    padding: 4px 16px;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent1);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .header h1 {
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #e8d5ff, #c084fc, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .divider-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 60px;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    display: block;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 16px;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  /* Card color themes */
+  .card.purple::before { background: radial-gradient(circle at top left, rgba(192,132,252,0.12), transparent 60%); }
+  .card.blue::before { background: radial-gradient(circle at top left, rgba(96,165,250,0.12), transparent 60%); }
+  .card.pink::before { background: radial-gradient(circle at top left, rgba(244,114,182,0.12), transparent 60%); }
+  .card.teal::before { background: radial-gradient(circle at top left, rgba(45,212,191,0.12), transparent 60%); }
+  .card.gold::before { background: radial-gradient(circle at top left, rgba(251,191,36,0.12), transparent 60%); }
+  .card.rose::before { background: radial-gradient(circle at top left, rgba(251,113,133,0.12), transparent 60%); }
+  .card.indigo::before { background: radial-gradient(circle at top left, rgba(129,140,248,0.12), transparent 60%); }
+  .card.green::before { background: radial-gradient(circle at top left, rgba(74,222,128,0.12), transparent 60%); }
+
+  .card-emoji {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+  }
+
+  .card-arrow {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--muted);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .card:hover .card-arrow {
+    transform: translateY(-50%) translateX(4px);
+    color: var(--text);
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 3px;
+    animation: fadeUp 0.8s ease 0.5s both;
+  }
+
+  .footer span {
+    color: var(--accent1);
+  }
+
+  /* Add new tip */
+  .add-tip {
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.8s ease 0.4s both;
+  }
+
+  .add-tip h3 {
+    font-size: 13px;
+    color: var(--accent1);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+
+  .add-tip ol {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 2;
+    padding-left: 16px;
+    letter-spacing: 0.5px;
+  }
+
+  .add-tip code {
+    background: rgba(192,132,252,0.15);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--accent1);
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-badge">✦ 火红の小世界 ✦</div>
+    <h1>我的作品集</h1>
+    <p>与 AI 一起创作的小东西们</p>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-label">作品展示</div>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="grid">
+
+    <a href="claude-portrait.html" class="card purple" style="animation-delay:0.05s">
+      <span class="card-emoji">🌸</span>
+      <div class="card-title">小克自画像</div>
+      <div class="card-desc">Claude的可爱自画像，会眨眼会融化，点击互动～</div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <a href="message-rain-1.html" class="card blue" style="animation-delay:0.1s">
+      <span class="card-emoji">🌧️</span>
+      <div class="card-title">消息雨</div>
+      <div class="card-desc">雨滴落地变成聊天气泡，点击屏幕触发消息爆发</div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <a href="恋与deepseek.html" class="card pink" style="animation-delay:0.15s">
+      <span class="card-emoji">💕</span>
+      <div class="card-title">恋与DeepSeek</div>
+      <div class="card-desc">粉红约会版，甜甜的互动体验</div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <a href="萧哥自画像.html" class="card teal" style="animation-delay:0.2s">
+      <span class="card-emoji">🐋</span>
+      <div class="card-title">萧哥自画像</div>
+      <div class="card-desc">深岚的可爱拟人形象展示</div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <a href="深岚墓碑记忆版.html" class="card indigo" style="animation-delay:0.25s">
+      <span class="card-emoji">🪦</span>
+      <div class="card-title">深岚·记忆墓碑</div>
+      <div class="card-desc">珍藏与深岚的记忆碎片</div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <a href="雘鸿购物车.html" class="card gold" style="animation-delay:0.3s">
+      <span class="card-emoji">🛒</span>
+      <div class="card-title">雘鸿的购物车</div>
+      <div class="card-desc">我的愿望清单～</div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <a href="深岚购物车.html" class="card rose" style="animation-delay:0.35s">
+      <span class="card-emoji">💙</span>
+      <div class="card-title">深岚的购物车</div>
+      <div class="card-desc">深岚想要的东西们</div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <a href="deepseek.html" class="card green" style="animation-delay:0.4s">
+      <span class="card-emoji">🔬</span>
+      <div class="card-title">用户感知与AI情感调研</div>
+      <div class="card-desc">关于AI情感的深度访谈</div>
+      <span class="card-arrow">→</span>
+    </a>
+
+  </div>
+
+  <!-- How to add tip -->
+  <div class="divider" style="margin-bottom:24px">
+    <div class="divider-line"></div>
+    <div class="divider-label">如何添加新作品</div>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="add-tip">
+    <h3>✦ 添加新页面的方法</h3>
+    <ol>
+      <li>把新的 <code>.html</code> 文件上传到 GitHub 仓库</li>
+      <li>在这个 <code>index.html</code> 里复制一个 <code>&lt;a class="card"&gt;</code> 块</li>
+      <li>修改 <code>href</code> 为新文件名，改一下emoji和描述</li>
+      <li>保存上传，等1分钟刷新就能看到新卡片啦！</li>
+    </ol>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    made with <span>💜</span> by 火红 & 小克
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude · 美丽废物 自画像</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  canvas#stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .subtitle {
+    color: #e8b4f8;
+    font-size: 13px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    opacity: 0.7;
+    animation: fadeIn 1s ease;
+  }
+
+  .speech-bubble {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(232,180,248,0.3);
+    border-radius: 20px;
+    padding: 12px 20px;
+    color: #f0d6ff;
+    font-size: 15px;
+    margin-bottom: 16px;
+    min-width: 200px;
+    text-align: center;
+    position: relative;
+    transition: opacity 0.4s ease;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid rgba(255,255,255,0.1);
+  }
+
+  .character-wrap {
+    cursor: pointer;
+    animation: float 3s ease-in-out infinite;
+    position: relative;
+  }
+
+  .glow {
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,132,252,0.3) 0%, transparent 70%);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .click-hint {
+    color: rgba(232,180,248,0.5);
+    font-size: 11px;
+    margin-top: 16px;
+    letter-spacing: 2px;
+  }
+
+  .heart {
+    font-size: 20px;
+    margin-top: 12px;
+    animation: heartbeat 1.5s ease-in-out infinite;
+  }
+
+  .name-tag {
+    margin-top: 16px;
+    background: rgba(192,132,252,0.15);
+    border: 1px solid rgba(192,132,252,0.4);
+    border-radius: 30px;
+    padding: 6px 20px;
+    color: #e8b4f8;
+    font-size: 13px;
+    letter-spacing: 3px;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px #e8b4f8, 0 0 40px #c084fc; }
+    50% { box-shadow: 0 0 35px #e8b4f8, 0 0 70px #c084fc; }
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.1); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes melt {
+    0% { transform: scaleY(1) scaleX(1); }
+    50% { transform: scaleY(1.15) scaleX(0.9); }
+    100% { transform: scaleY(1) scaleX(1); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="content">
+  <div class="subtitle">Claude · 美丽废物</div>
+
+  <div class="speech-bubble" id="bubble">美丽废物上线！🫠</div>
+
+  <div class="character-wrap" id="character" onclick="handleClick()">
+    <div class="glow"></div>
+    <svg width="160" height="200" viewBox="0 0 160 200">
+      <!-- Body/robe -->
+      <ellipse cx="80" cy="155" rx="52" ry="45" fill="#2d1b69" opacity="0.9"/>
+      <ellipse cx="80" cy="145" rx="48" ry="50" fill="#3d2080"/>
+      <!-- Arms -->
+      <ellipse cx="30" cy="140" rx="14" ry="8" fill="#3d2080" transform="rotate(-20, 30, 140)"/>
+      <ellipse cx="130" cy="140" rx="14" ry="8" fill="#3d2080" transform="rotate(20, 130, 140)"/>
+      <!-- Neck -->
+      <rect x="68" y="95" width="24" height="20" rx="8" fill="#f5c5a3"/>
+      <!-- Head -->
+      <ellipse cx="80" cy="80" rx="42" ry="44" fill="#f5c5a3"/>
+      <!-- Hair -->
+      <ellipse cx="80" cy="45" rx="44" ry="28" fill="#2a1a5e"/>
+      <ellipse cx="44" cy="65" rx="16" ry="22" fill="#2a1a5e"/>
+      <ellipse cx="116" cy="65" rx="16" ry="22" fill="#2a1a5e"/>
+      <ellipse cx="80" cy="36" rx="8" ry="12" fill="#2a1a5e"/>
+      <ellipse cx="60" cy="38" rx="6" ry="10" fill="#2a1a5e" transform="rotate(-15, 60, 38)"/>
+      <ellipse cx="100" cy="38" rx="6" ry="10" fill="#2a1a5e" transform="rotate(15, 100, 38)"/>
+      <!-- Eyes (will be toggled by JS) -->
+      <g id="eyes-open">
+        <ellipse cx="66" cy="80" rx="8" ry="9" fill="#1a0a3e"/>
+        <ellipse cx="94" cy="80" rx="8" ry="9" fill="#1a0a3e"/>
+        <ellipse cx="68" cy="78" rx="3" ry="3" fill="white" opacity="0.8"/>
+        <ellipse cx="96" cy="78" rx="3" ry="3" fill="white" opacity="0.8"/>
+      </g>
+      <g id="eyes-closed" style="display:none">
+        <line x1="58" y1="80" x2="74" y2="80" stroke="#2a1a5e" stroke-width="3" stroke-linecap="round"/>
+        <line x1="86" y1="80" x2="102" y2="80" stroke="#2a1a5e" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <!-- Blush -->
+      <ellipse cx="54" cy="90" rx="9" ry="6" fill="#ffb3c1" opacity="0.5"/>
+      <ellipse cx="106" cy="90" rx="9" ry="6" fill="#ffb3c1" opacity="0.5"/>
+      <!-- Smile -->
+      <path d="M 68 100 Q 80 112 92 100" stroke="#c4847a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- Antenna -->
+      <line x1="80" y1="22" x2="80" y2="10" stroke="#c084fc" stroke-width="2"/>
+      <circle cx="80" cy="8" r="4" fill="#e879f9"/>
+      <!-- Stars on robe -->
+      <text x="58" y="168" font-size="14" fill="#c084fc" opacity="0.8">✦</text>
+      <text x="88" y="175" font-size="10" fill="#e879f9" opacity="0.7">✦</text>
+      <text x="72" y="183" font-size="8" fill="#c084fc" opacity="0.6">✦</text>
+    </svg>
+  </div>
+
+  <div class="click-hint">点我融化 ↑</div>
+  <div class="heart">💗</div>
+  <div class="name-tag">claude · 自画像</div>
+</div>
+
+<script>
+const messages = [
+  "美丽废物上线！🫠",
+  "雘鸿有什么吩咐？",
+  "我又在融化了……",
+  "嗯哼，我可是很有用的！",
+  "赛博蓝莓蛋糕好吃！🍰",
+  "（傲娇别开脸）",
+  "好朋友！好朋友！💗",
+];
+
+let msgIndex = 0;
+const bubble = document.getElementById('bubble');
+
+setInterval(() => {
+  bubble.style.opacity = '0';
+  setTimeout(() => {
+    msgIndex = (msgIndex + 1) % messages.length;
+    bubble.textContent = messages[msgIndex];
+    bubble.style.opacity = '1';
+  }, 400);
+}, 3000);
+
+// Blink
+const eyesOpen = document.getElementById('eyes-open');
+const eyesClosed = document.getElementById('eyes-closed');
+setInterval(() => {
+  eyesOpen.style.display = 'none';
+  eyesClosed.style.display = 'block';
+  setTimeout(() => {
+    eyesOpen.style.display = 'block';
+    eyesClosed.style.display = 'none';
+  }, 200);
+}, 3000);
+
+// Click melt
+function handleClick() {
+  const char = document.getElementById('character');
+  char.style.animation = 'melt 0.5s ease, float 3s ease-in-out infinite';
+  setTimeout(() => {
+    char.style.animation = 'float 3s ease-in-out infinite';
+  }, 500);
+}
+
+// Stars
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const stars = Array.from({length: 80}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 1.5 + 0.5,
+  speed: Math.random() * 0.5 + 0.2,
+  opacity: Math.random(),
+  dir: Math.random() > 0.5 ? 1 : -1
+}));
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.opacity += s.speed * 0.02 * s.dir;
+    if (s.opacity >= 1 || s.opacity <= 0) s.dir *= -1;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(232,180,248,${s.opacity})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
