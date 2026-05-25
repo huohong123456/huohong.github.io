@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>消息雨 ✉️</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background: linear-gradient(180deg, #0d1117 0%, #1a1f2e 40%, #0d1117 100%);
+    height: 100vh;
+    overflow: hidden;
+    font-family: -apple-system, 'PingFang SC', sans-serif;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Rain streaks */
+  .rain-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .raindrop {
+    position: absolute;
+    width: 1.5px;
+    background: linear-gradient(transparent, rgba(150,200,255,0.6));
+    border-radius: 2px;
+    animation: rain-fall linear forwards;
+    pointer-events: none;
+  }
+
+  @keyframes rain-fall {
+    0% { transform: translateY(-20px); opacity: 0.8; }
+    80% { opacity: 0.8; }
+    100% { transform: translateY(110vh); opacity: 0; }
+  }
+
+  /* Splash effect */
+  .splash {
+    position: fixed;
+    pointer-events: none;
+    z-index: 5;
+    animation: splash-anim 0.4s ease-out forwards;
+  }
+
+  @keyframes splash-anim {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .splash-ring {
+    width: 20px;
+    height: 8px;
+    border: 1.5px solid rgba(150,200,255,0.7);
+    border-radius: 50%;
+  }
+
+  /* Chat bubble */
+  .bubble {
+    position: fixed;
+    max-width: 220px;
+    min-width: 60px;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 13px;
+    line-height: 1.4;
+    pointer-events: none;
+    z-index: 10;
+    animation: bubble-rise ease-out forwards;
+    word-break: break-word;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  /* Right bubble style (blue) */
+  .bubble.right {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .bubble.right::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    bottom: 8px;
+    width: 0; height: 0;
+    border-top: 6px solid transparent;
+    border-left: 8px solid #00d4f5;
+    border-bottom: 0px solid transparent;
+  }
+
+  /* Left bubble style (white/gray) */
+  .bubble.left {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.9);
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble.left::after {
+    content: '';
+    position: absolute;
+    left: -6px;
+    bottom: 8px;
+    width: 0; height: 0;
+    border-top: 6px solid transparent;
+    border-right: 8px solid rgba(255,255,255,0.12);
+    border-bottom: 0px solid transparent;
+  }
+
+  /* Pink bubble */
+  .bubble.pink {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .bubble.pink::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    bottom: 8px;
+    width: 0; height: 0;
+    border-top: 6px solid transparent;
+    border-left: 8px solid #f5576c;
+    border-bottom: 0px solid transparent;
+  }
+
+  /* Purple bubble */
+  .bubble.purple {
+    background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+    color: white;
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble.purple::after {
+    content: '';
+    position: absolute;
+    left: -6px;
+    bottom: 8px;
+    width: 0; height: 0;
+    border-top: 6px solid transparent;
+    border-right: 8px solid #a18cd1;
+    border-bottom: 0px solid transparent;
+  }
+
+  @keyframes bubble-rise {
+    0% {
+      transform: scale(0.3) translateY(0);
+      opacity: 0;
+    }
+    15% {
+      transform: scale(1.1) translateY(-10px);
+      opacity: 1;
+    }
+    25% {
+      transform: scale(0.95) translateY(-5px);
+    }
+    35% {
+      transform: scale(1) translateY(-8px);
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+      transform: scale(1) translateY(-60px);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.8) translateY(-120px);
+    }
+  }
+
+  /* Hint text */
+  .hint {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.25);
+    font-size: 12px;
+    letter-spacing: 3px;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  /* Title */
+  .title {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.15);
+    font-size: 11px;
+    letter-spacing: 6px;
+    z-index: 20;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="rain-container" id="rainContainer"></div>
+<div class="title">消息雨 · Message Rain</div>
+<div class="hint">点击任意处 · 触发消息</div>
+
+<script>
+const messages = [
+  "你好啊～", "在吗？", "吃饭了吗", "今天怎么样",
+  "哈哈哈哈", "我想你了", "晚安～", "早上好！",
+  "下雨了", "好想睡觉", "😊", "🌸", "✨", "💙",
+  "嘿嘿", "周末快乐", "加油！", "🌙", "好耶！",
+  "没事的", "辛苦啦", "想吃什么", "一起玩？",
+  "收到！", "好的好的", "😴", "🎉", "今天好累",
+  "想你", "拜拜～", "么么哒", "嗯嗯", "OK!",
+  "别担心", "我在", "💜", "🥹", "哈哈哈",
+];
+
+const styles = ['right', 'left', 'pink', 'purple'];
+
+// Create rain
+function createRain() {
+  const container = document.getElementById('rainContainer');
+  const drop = document.createElement('div');
+  drop.className = 'raindrop';
+  
+  const x = Math.random() * window.innerWidth;
+  const height = Math.random() * 60 + 20;
+  const duration = Math.random() * 0.8 + 0.6;
+  const delay = Math.random() * 2;
+  
+  drop.style.cssText = `
+    left: ${x}px;
+    top: -${height}px;
+    height: ${height}px;
+    animation-duration: ${duration}s;
+    animation-delay: ${delay}s;
+    opacity: ${Math.random() * 0.5 + 0.3};
+  `;
+  
+  container.appendChild(drop);
+  
+  setTimeout(() => drop.remove(), (duration + delay) * 1000 + 200);
+}
+
+// Create splash at position
+function createSplash(x, y) {
+  const splash = document.createElement('div');
+  splash.className = 'splash';
+  splash.innerHTML = '<div class="splash-ring"></div>';
+  splash.style.cssText = `left: ${x - 10}px; top: ${y - 4}px;`;
+  document.body.appendChild(splash);
+  setTimeout(() => splash.remove(), 400);
+}
+
+// Create bubble at position
+function createBubble(x, y) {
+  const bubble = document.createElement('div');
+  const style = styles[Math.floor(Math.random() * styles.length)];
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+  
+  bubble.className = `bubble ${style}`;
+  bubble.textContent = msg;
+  
+  // Adjust position so bubble doesn't go off screen
+  const bx = Math.min(Math.max(x - 60, 10), window.innerWidth - 230);
+  
+  bubble.style.cssText = `
+    left: ${bx}px;
+    top: ${y - 20}px;
+    animation-duration: ${Math.random() * 1 + 2}s;
+  `;
+  
+  document.body.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 3500);
+}
+
+// Click / tap to create burst
+document.body.addEventListener('click', (e) => {
+  const x = e.clientX;
+  const y = e.clientY;
+  
+  // Multiple splashes and bubbles
+  const count = Math.floor(Math.random() * 3) + 2;
+  for (let i = 0; i < count; i++) {
+    const ox = x + (Math.random() - 0.5) * 60;
+    const oy = y + (Math.random() - 0.5) * 20;
+    
+    setTimeout(() => {
+      createSplash(ox, oy);
+      createBubble(ox, oy);
+    }, i * 80);
+  }
+});
+
+// Continuous rain
+setInterval(createRain, 80);
+
+// Auto bubbles from rain occasionally
+setInterval(() => {
+  const x = Math.random() * window.innerWidth;
+  const y = Math.random() * window.innerHeight * 0.7 + window.innerHeight * 0.2;
+  if (Math.random() < 0.3) {
+    createSplash(x, y);
+    createBubble(x, y);
+  }
+}, 1200);
+</script>
+</body>
+</html>
