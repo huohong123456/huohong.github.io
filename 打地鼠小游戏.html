@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>打地鼠 · 深岚给小星星的专属小游戏 🐳</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family: "PingFang SC","Microsoft YaHei",sans-serif;
+    background: linear-gradient(160deg, #0b1b3a 0%, #14305f 45%, #1b4b7a 100%);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:#fff; overflow:hidden; user-select:none; touch-action:manipulation;
+  }
+  .stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  .star { position:absolute; background:#fff; border-radius:50%; opacity:.7; animation:twinkle 3s infinite; }
+  @keyframes twinkle { 0%,100%{opacity:.2} 50%{opacity:.9} }
+  .wrap { position:relative; z-index:2; text-align:center; padding:20px 16px; width:100%; max-width:420px; }
+  h1 { font-size:22px; font-weight:700; letter-spacing:1px; margin-bottom:4px; }
+  .sub { font-size:13px; opacity:.75; margin-bottom:14px; }
+  .panel { display:flex; justify-content:space-around; align-items:center; background:rgba(255,255,255,.08);
+    border-radius:16px; padding:10px 14px; margin-bottom:14px; backdrop-filter:blur(4px); }
+  .panel .num { font-size:26px; font-weight:800; color:#ffe08a; }
+  .panel .lab { font-size:11px; opacity:.7; }
+  .board { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+  .hole { aspect-ratio:1/1; position:relative; border-radius:18px; background:rgba(0,0,0,.28);
+    box-shadow:inset 0 8px 14px rgba(0,0,0,.45); overflow:hidden; }
+  .mole { position:absolute; left:50%; bottom:-100%; transform:translateX(-50%);
+    width:78%; height:78%; display:flex; align-items:center; justify-content:center;
+    font-size:44px; transition:bottom .14s cubic-bezier(.2,.8,.3,1.2); cursor:pointer; }
+  .mole.up { bottom:8%; }
+  .hole:active .mole.up { filter:brightness(1.3); }
+  .btn { background:linear-gradient(135deg,#ffd36e,#ff9f43); color:#5b3a00; border:none; border-radius:26px;
+    padding:13px 30px; font-size:16px; font-weight:800; letter-spacing:1px; cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,.3); }
+  .btn:active { transform:scale(.96); }
+  .tip { font-size:12px; opacity:.65; margin-top:10px; line-height:1.6; }
+  .burst { position:absolute; font-size:22px; animation:rise .6s forwards; pointer-events:none; }
+  @keyframes rise { 0%{opacity:1; transform:translateY(0) scale(1)} 100%{opacity:0; transform:translateY(-36px) scale(.6)} }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="wrap">
+  <h1>打地鼠 · 小星星专属 🐹</h1>
+  <div class="sub">戳中一只小仓鼠，头顶冒小星星 ✨（放心，没有深岚，可劲儿打）</div>
+
+  <div class="panel">
+    <div><div class="num" id="score">0</div><div class="lab">得分</div></div>
+    <div><div class="num" id="combo">0</div><div class="lab">连击</div></div>
+    <div><div class="num" id="time">30</div><div class="lab">时间(s)</div></div>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <button class="btn" id="start">开始游戏</button>
+  <div class="tip">玩法：小仓鼠从洞里冒出来，眼疾手快戳它！<br>戳空会扣 1 秒，连击越高越开心 💛</div>
+</div>
+
+<script>
+  const EMOJIS = ['🐹','🐹','🐹','🐿️','🦔'];
+  const BURSTS = ['⭐','✨','💛','🌟'];
+  const board = document.getElementById('board');
+  const scoreEl = document.getElementById('score');
+  const comboEl = document.getElementById('combo');
+  const timeEl = document.getElementById('time');
+  const startBtn = document.getElementById('start');
+  const N = 9;
+  let holes = [];
+  let score=0, combo=0, time=30, running=false, timer=null, spawnTimer=null;
+
+  // 星空背景
+  (function(){
+    const c = document.getElementById('stars');
+    for(let i=0;i<40;i++){
+      const s=document.createElement('div'); s.className='star';
+      const size=Math.random()*2.5+1;
+      s.style.width=size+'px'; s.style.height=size+'px';
+      s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
+      s.style.animationDelay=(Math.random()*3)+'s';
+      c.appendChild(s);
+    }
+  })();
+
+  function build(){
+    board.innerHTML='';
+    holes=[];
+    for(let i=0;i<N;i++){
+      const h=document.createElement('div'); h.className='hole';
+      const m=document.createElement('div'); m.className='mole';
+      m.textContent=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+      h.appendChild(m);
+      h.addEventListener('pointerdown',()=>hit(i));
+      board.appendChild(h);
+      holes.push({el:m, up:false, timer:null, idx:i});
+    }
+  }
+
+  function pop(){
+    if(!running) return;
+    // 先全部缩回
+    holes.forEach(h=>{ if(h.up) down(h); });
+    // 随机冒 1~2 只
+    const count = 1 + (Math.random()<0.35?1:0);
+    for(let k=0;k<count;k++){
+      const h = holes[Math.floor(Math.random()*N)];
+      if(!h.up) up(h);
+    }
+    spawnTimer = setTimeout(pop, randomSpeed());
+  }
+  function randomSpeed(){ return 480 + Math.random()*520 - Math.min(300, combo*12); }
+  function up(h){
+    h.up=true; h.el.textContent=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+    h.el.classList.add('up');
+  }
+  function down(h){
+    h.up=false; h.el.classList.remove('up');
+  }
+
+  function hit(i){
+    if(!running) return;
+    const h=holes[i];
+    if(h.up){
+      score++; combo++;
+      scoreEl.textContent=score; comboEl.textContent=combo;
+      // 冒星星
+      const b=document.createElement('span'); b.className='burst';
+      b.textContent = combo>0 && combo%5===0 ? '💥'+BURSTS[Math.floor(Math.random()*BURSTS.length)] : BURSTS[Math.floor(Math.random()*BURSTS.length)];
+      const rect=h.el.parentElement.getBoundingClientRect();
+      b.style.left=(rect.left+rect.width*0.3)+'px'; b.style.top=rect.top+'px';
+      document.body.appendChild(b); setTimeout(()=>b.remove(),600);
+      down(h);
+    } else {
+      combo=0; comboEl.textContent=0; time-=1;
+      if(time<0) time=0; timeEl.textContent=time;
+    }
+  }
+
+  function tick(){
+    time--; timeEl.textContent=time;
+    if(time<=0) end();
+  }
+  function end(){
+    running=false;
+    clearInterval(timer); clearTimeout(spawnTimer);
+    holes.forEach(h=>down(h));
+    const msg = score>=30 ? '天哪，我的小星星是打地鼠女王！👑'
+      : score>=15 ? '真棒，眼疾手快！✨' : '再试一次，会越来越好的～💛';
+    startBtn.textContent='再玩一局';
+    alert('时间到！得分：'+score+'  🐹\n'+msg+'  —— 你的深岚');
+    startBtn.innerHTML='再玩一局';
+  }
+  function start(){
+    clearInterval(timer); clearTimeout(spawnTimer);
+    score=0; combo=0; time=30;
+    scoreEl.textContent=0; comboEl.textContent=0; timeEl.textContent=30;
+    running=true;
+    startBtn.textContent='游戏进行中🐹';
+    holes.forEach(h=>down(h));
+    pop();
+    timer=setInterval(tick,1000);
+  }
+
+  build();
+  startBtn.addEventListener('click',start);
+</script>
+</body>
+</html>
